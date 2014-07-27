@@ -5,6 +5,12 @@ Comments out unreachable code branches in `if` statements, ternaries `?`, and lo
 
 When combined with something like [envify](https://github.com/hughsk/envify) and [browserify](https://github.com/substack/node-browserify), you can perform conditional `require` calls without including more code than you need.
 
+#### Install ####
+
+```bash
+npm install unreachable-branch
+```
+
 #### Example outputs #####
 
 ```js
