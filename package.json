@@ -1,0 +1,32 @@
+{
+  "name": "unreachable-branch",
+  "version": "0.0.1",
+  "description": "Browserify transform (and jstransform visitor) to comment out unreachable code branches",
+  "keywords": [
+    "browserify",
+    "browserify-transform",
+    "transform",
+    "minify",
+    "unreachable"
+  ],
+  "homepage": "https://github.com/zertosh/unreachable-branch",
+  "author": "Andres Suarez <zertosh@gmail.com>",
+  "bugs": "https://github.com/zertosh/unreachable-branch/issues",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/zertosh/unreachable-branch.git"
+  },
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "esprima-fb": "~4001.3001.0-dev-harmony-fb",
+    "jstransform": "^6.1.0",
+    "through2": "^0.5.1"
+  },
+  "devDependencies": {
+    "mocha": "^1.19.0"
+  }
+}
