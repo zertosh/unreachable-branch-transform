@@ -1,5 +1,5 @@
 {
-  "name": "unreachable-branch",
+  "name": "unreachable-branch-transform",
   "version": "0.0.2",
   "description": "Browserify transform (and jstransform visitor) to comment out unreachable code branches",
   "keywords": [
@@ -9,12 +9,12 @@
     "minify",
     "unreachable"
   ],
-  "homepage": "https://github.com/zertosh/unreachable-branch",
+  "homepage": "https://github.com/zertosh/unreachable-branch-transform",
   "author": "Andres Suarez <zertosh@gmail.com>",
-  "bugs": "https://github.com/zertosh/unreachable-branch/issues",
+  "bugs": "https://github.com/zertosh/unreachable-branch-transform/issues",
   "repository": {
     "type": "git",
-    "url": "git://github.com/zertosh/unreachable-branch.git"
+    "url": "git://github.com/zertosh/unreachable-branch-transform.git"
   },
   "main": "index.js",
   "scripts": {
