@@ -22,9 +22,8 @@
   },
   "license": "MIT",
   "dependencies": {
-    "esprima-fb": "~4001.3001.0-dev-harmony-fb",
-    "jstransform": "^6.1.0",
-    "through2": "^0.5.1"
+    "jstransform": "^6.3.2",
+    "through2": "^0.6.2"
   },
   "devDependencies": {
     "mocha": "^1.19.0"
