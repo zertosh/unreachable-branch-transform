@@ -1,97 +1,99 @@
-var assert = require('assert');
+var test = require('tape');
 
-describe('unreachableBranchVisitors', function() {
+test('unreachable-branch-transform', function(t) {
 
-  var transformFn = require('jstransform').transform;
-  var visitors = require('../unreachableBranchVisitors').visitorList;
-
-  function transform(code) {
-    return transformFn(visitors, code).code;
-  }
+  var transform = require('../').transform;
 
   function expectTransform(code, result) {
-    assert.equal(transform(code), (result));
+    return transform(code) === result;
   }
 
-  describe('ConditionalExpression', function() {
+  t.test('ConditionalExpression', function(t) {
 
-    it('should do nothing', function() {
+    t.test('should do nothing', function(t) {
       // True ? Reachable_Constant : Unreachable_Constant
-      expectTransform(
+      t.ok(expectTransform(
         'var a = true ? true : true;',
         'var a = true ? true : true;'
-      );
+      ));
       // False ? Unreachable_Constant : Reachable_Constant
-      expectTransform(
+      t.ok(expectTransform(
         'var a = false ? true : true;',
         'var a = false ? true : true;'
-      );
+      ));
       // True ? Reachable_Indeterminate : Unreachable_Constant
-      expectTransform(
+      t.ok(expectTransform(
         'var a = true ? console.log() : true;',
         'var a = true ? console.log() : true;'
-      );
+      ));
+      t.end();
     });
 
-    it('should comment out the alternate with boolean test', function() {
+    t.test('should comment out the alternate with boolean test', function(t) {
       // True ? Reachable_Constant : Unreachable_Indeterminate
-      expectTransform(
+      t.ok(expectTransform(
         'var a = true ? true : console.log();',
         'var a = true ? true : null /*console.log()*/;'
-      );
+      ));
       // True ? Reachable_Indeterminate : Unreachable_Indeterminate
-      expectTransform(
+      t.ok(expectTransform(
         'var a = true ? console.log() : console.log();',
         'var a = true ? console.log() : null /*console.log()*/;'
-      );
+      ));
+      t.end();
     });
 
-    it('should comment out the alternate with string cast test', function() {
+    t.test('should comment out the alternate with string cast test', function(t) {
       // True ? Reachable_Constant : Unreachable_Indeterminate
-      expectTransform(
+      t.ok(expectTransform(
         'var a = "true" ? true : console.log();',
         'var a = "true" ? true : null /*console.log()*/;'
-      );
+      ));
       // True ? Reachable_Indeterminate : Unreachable_Indeterminate
-      expectTransform(
+      t.ok(expectTransform(
         'var a = "true" ? console.log() : console.log();',
         'var a = "true" ? console.log() : null /*console.log()*/;'
-      );
+      ));
+      t.end();
     });
 
-    it('should comment out the consequent with string cast test', function() {
+    t.test('should comment out the consequent with string cast test', function(t) {
       // True ? Reachable_Constant : Unreachable_Indeterminate
-      expectTransform(
+      t.ok(expectTransform(
         'var a = "" ? console.log() : true;',
         'var a = "" ? null /*console.log()*/ : true;'
-      );
+      ));
       // True ? Reachable_Indeterminate : Unreachable_Indeterminate
-      expectTransform(
+      t.ok(expectTransform(
         'var a = "" ? console.log() : console.log();',
         'var a = "" ? null /*console.log()*/ : console.log();'
-      );
+      ));
+      t.end();
     });
 
+    t.end();
   });
 
-  describe('IfStatement', function() {
+  t.test('IfStatement', function(t) {
 
-    it('should Comment alternate BlockStatement body', function() {
-      expectTransform(
+    t.test('should Comment alternate BlockStatement body', function(t) {
+      t.ok(expectTransform(
         'if (true) { console.log(); } else { console.log(); }',
         'if (true) { console.log(); } else {/* console.log(); */}'
-      );
+      ));
+      t.end();
     });
 
-    it('should Comment consequent BlockStatement body', function() {
-      expectTransform(
+    t.test('should Comment consequent BlockStatement body', function(t) {
+      t.ok(expectTransform(
         'if (false) { console.log(); } else { console.log(); }',
         'if (false) {/* console.log(); */} else { console.log(); }'
-      );
+      ));
+      t.end();
     });
 
-    it('should Comment alternate IfStatement body', function() {
-      expectTransform([
+    t.test('should Comment alternate IfStatement body', function(t) {
+      t.ok(expectTransform([
         'if (true) {',
         '  console.log();',
         '} else if (true) {',
@@ -107,11 +109,12 @@ describe('unreachableBranchVisitors', function() {
         '} else {',
         '  console.log();',
         '}*/'
-      ].join('\n'));
+      ].join('\n')));
+      t.end();
     });
 
-    it('should Comment consequent BlockStatement body and alternate IfStatement alternate', function() {
-      expectTransform([
+    t.test('should Comment consequent BlockStatement body and alternate IfStatement alternate', function(t) {
+      t.ok(expectTransform([
         'if (false) {',
         '  console.log();',
         '} else if (true) {',
@@ -127,37 +130,43 @@ describe('unreachableBranchVisitors', function() {
         '} else {/*',
         '  console.log();',
         '*/}'
-      ].join('\n'));
+      ].join('\n')));
+      t.end();
     });
 
+    t.end();
   });
 
-  describe('LogicalExpression', function() {
-    it('should do nothing', function() {
-      expectTransform(
+  t.test('LogicalExpression', function(t) {
+    t.test('should do nothing', function(t) {
+      t.ok(expectTransform(
         'true || true;',
         'true || true;'
-      );
-      expectTransform(
+      ));
+      t.ok(expectTransform(
         'false || console.log();',
         'false || console.log();'
-      );
-      expectTransform(
+      ));
+      t.ok(expectTransform(
         'true && console.log();',
         'true && console.log();'
-      );
+      ));
+      t.end();
     });
 
-    it('should Comment right', function() {
-      expectTransform(
+    t.test('should Comment right', function(t) {
+      t.ok(expectTransform(
         'true || console.log();',
         'true || null /*console.log()*/;'
-      );
-      expectTransform(
+      ));
+      t.ok(expectTransform(
         'false && console.log();',
         'false && null /*console.log()*/;'
-      );
+      ));
+      t.end();
     });
+
+    t.end();
   });
 
 });
