@@ -1,12 +1,18 @@
 var through = require('through2');
+var path = require('path');
 var jstransform = require('jstransform').transform;
 
 var reJSONFile = /\.json$/;
 
 var visitorList = require('./unreachableBranchVisitors').visitorList;
 
-function process(file/*, opts*/) {
+function process(file, opts) {
+  // pass exts to whitelist a set of extensions to process.
+  var exts = [].concat(opts.exts || [])
+
   if (reJSONFile.test(file)) return through();
+  if (exts.length && exts.indexOf(path.extname(file)) === -1) return through();
+
   var buf = '';
   return through(function(chunk, enc, cb) {
     buf += chunk;
