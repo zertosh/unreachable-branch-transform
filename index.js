@@ -1,28 +1,30 @@
 var through = require('through2');
-var jstransform = require('jstransform').transform;
+var recast = require('recast');
 
-var reJSONFile = /\.json$/;
+var transformer = require('./unreachableBranchTransformer');
 
-var visitorList = require('./unreachableBranchVisitors').visitorList;
+module.exports = function (file, opts) {
+  var ignore = ['.json'].concat(opts.ignore || []).some(function(ext) {
+    return file.indexOf(ext, file.length - ext.length) !== -1;
+  });
 
-function process(file/*, opts*/) {
-  if (reJSONFile.test(file)) return through();
-  var buf = '';
+  if (ignore) {
+    return through();
+  }
+
+  var buffers = [];
   return through(function(chunk, enc, cb) {
-    buf += chunk;
+    buffers.push(chunk);
     cb();
   }, function(cb) {
-    this.push(transform(buf));
+    var source = Buffer.concat(buffers).toString();
+    this.push(transform(source));
     cb();
   });
-}
-
-module.exports = process;
+};
 
 function transform(code/*, opts*/) {
-  return jstransform(visitorList, code).code;
+  return recast.print( transformer( recast.parse(code) ) ).code;
 }
 
 module.exports.transform = transform;
-
-module.exports.visitorList = visitorList;

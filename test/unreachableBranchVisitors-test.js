@@ -1,172 +1,175 @@
-var test = require('tape');
+var assert = require('assert');
 
-test('unreachable-branch-transform', function(t) {
+describe('unreachable-branch-transform', function() {
 
   var transform = require('../').transform;
 
-  function expectTransform(code, result) {
-    return transform(code) === result;
+  function expectTransform(code_, result_) {
+    var code = Array.isArray(code_) ? code_.join('\n') : code_;
+    var result = Array.isArray(result_) ? result_.join('\n') : result_;
+    return assert.equal(transform(code), result);
   }
 
-  t.test('ConditionalExpression', function(t) {
+  it('works in ExpressionStatement', function() {
+    expectTransform(
+      'true || true;',
+      'true;'
+    );
 
-    t.test('should do nothing', function(t) {
-      // True ? Reachable_Constant : Unreachable_Constant
-      t.ok(expectTransform(
-        'var a = true ? true : true;',
-        'var a = true ? true : true;'
-      ));
-      // False ? Unreachable_Constant : Reachable_Constant
-      t.ok(expectTransform(
-        'var a = false ? true : true;',
-        'var a = false ? true : true;'
-      ));
-      // True ? Reachable_Indeterminate : Unreachable_Constant
-      t.ok(expectTransform(
-        'var a = true ? console.log() : true;',
-        'var a = true ? console.log() : true;'
-      ));
-      t.end();
-    });
+    expectTransform(
+      'false || console.log();',
+      'console.log();'
+    );
 
-    t.test('should comment out the alternate with boolean test', function(t) {
-      // True ? Reachable_Constant : Unreachable_Indeterminate
-      t.ok(expectTransform(
-        'var a = true ? true : console.log();',
-        'var a = true ? true : null /*console.log()*/;'
-      ));
-      // True ? Reachable_Indeterminate : Unreachable_Indeterminate
-      t.ok(expectTransform(
-        'var a = true ? console.log() : console.log();',
-        'var a = true ? console.log() : null /*console.log()*/;'
-      ));
-      t.end();
-    });
+    expectTransform(
+      'true && console.log();',
+      'console.log();'
+    );
 
-    t.test('should comment out the alternate with string cast test', function(t) {
-      // True ? Reachable_Constant : Unreachable_Indeterminate
-      t.ok(expectTransform(
-        'var a = "true" ? true : console.log();',
-        'var a = "true" ? true : null /*console.log()*/;'
-      ));
-      // True ? Reachable_Indeterminate : Unreachable_Indeterminate
-      t.ok(expectTransform(
-        'var a = "true" ? console.log() : console.log();',
-        'var a = "true" ? console.log() : null /*console.log()*/;'
-      ));
-      t.end();
-    });
+    expectTransform(
+      'true || console.log();',
+      'true;'
+    );
 
-    t.test('should comment out the consequent with string cast test', function(t) {
-      // True ? Reachable_Constant : Unreachable_Indeterminate
-      t.ok(expectTransform(
-        'var a = "" ? console.log() : true;',
-        'var a = "" ? null /*console.log()*/ : true;'
-      ));
-      // True ? Reachable_Indeterminate : Unreachable_Indeterminate
-      t.ok(expectTransform(
-        'var a = "" ? console.log() : console.log();',
-        'var a = "" ? null /*console.log()*/ : console.log();'
-      ));
-      t.end();
-    });
-
-    t.end();
+    expectTransform(
+      'false && console.log();',
+      'false;'
+    );
   });
 
-  t.test('IfStatement', function(t) {
 
-    t.test('should Comment alternate BlockStatement body', function(t) {
-      t.ok(expectTransform(
-        'if (true) { console.log(); } else { console.log(); }',
-        'if (true) { console.log(); } else {/* console.log(); */}'
-      ));
-      t.end();
-    });
+  it('works in VariableDeclarator', function() {
 
-    t.test('should Comment consequent BlockStatement body', function(t) {
-      t.ok(expectTransform(
-        'if (false) { console.log(); } else { console.log(); }',
-        'if (false) {/* console.log(); */} else { console.log(); }'
-      ));
-      t.end();
-    });
+    expectTransform(
+      'var a = true ? true : true;',
+      'var a = true;'
+    );
 
-    t.test('should Comment alternate IfStatement body', function(t) {
-      t.ok(expectTransform([
-        'if (true) {',
-        '  console.log();',
-        '} else if (true) {',
-        '  console.log();',
-        '} else {',
-        '  console.log();',
-        '}'
-      ].join('\n'), [
-        'if (true) {',
-        '  console.log();',
-        '} else null /*if (true) {',
-        '  console.log();',
-        '} else {',
-        '  console.log();',
-        '}*/'
-      ].join('\n')));
-      t.end();
-    });
+    expectTransform(
+      'var a = true ? true : true;',
+      'var a = true;'
+    );
 
-    t.test('should Comment consequent BlockStatement body and alternate IfStatement alternate', function(t) {
-      t.ok(expectTransform([
-        'if (false) {',
-        '  console.log();',
-        '} else if (true) {',
-        '  console.log();',
-        '} else {',
-        '  console.log();',
-        '}'
-      ].join('\n'), [
-        'if (false) {/*',
-        '  console.log();',
-        '*/} else if (true) {',
-        '  console.log();',
-        '} else {/*',
-        '  console.log();',
-        '*/}'
-      ].join('\n')));
-      t.end();
-    });
+    expectTransform(
+      'var a = false ? true : true;',
+      'var a = true;'
+    );
 
-    t.end();
+    expectTransform(
+      'var a = true ? console.log() : true;',
+      'var a = console.log();'
+    );
+
+    expectTransform(
+      'var a = true ? true : console.log();',
+      'var a = true;'
+    );
+
+    expectTransform(
+      'var a = true ? console.log() : console.log();',
+      'var a = console.log();'
+    );
+
+    expectTransform(
+      'var a = "true" ? true : console.log();',
+      'var a = true;'
+    );
+
+    expectTransform(
+      'var a = "true" ? console.log(1) : console.log(2);',
+      'var a = console.log(1);'
+    );
+
+    expectTransform(
+      'var a = "" ? console.log() : true;',
+      'var a = true;'
+    );
+
+    expectTransform(
+      'var a = "" ? console.log(1) : console.log(2);',
+      'var a = console.log(2);'
+    );
+
+    expectTransform(
+      'var a = "production" !== "development" ? console.log(3) : console.log(4);',
+      'var a = console.log(3);'
+    );
+
+    expectTransform(
+      'var a = "production" === "development" ? console.log(5) : console.log(6);',
+      'var a = console.log(6);'
+    );
   });
 
-  t.test('LogicalExpression', function(t) {
-    t.test('should do nothing', function(t) {
-      t.ok(expectTransform(
-        'true || true;',
-        'true || true;'
-      ));
-      t.ok(expectTransform(
-        'false || console.log();',
-        'false || console.log();'
-      ));
-      t.ok(expectTransform(
-        'true && console.log();',
-        'true && console.log();'
-      ));
-      t.end();
-    });
+  it('works in IfStatement', function() {
 
-    t.test('should Comment right', function(t) {
-      t.ok(expectTransform(
-        'true || console.log();',
-        'true || null /*console.log()*/;'
-      ));
-      t.ok(expectTransform(
-        'false && console.log();',
-        'false && null /*console.log()*/;'
-      ));
-      t.end();
-    });
+    expectTransform(
+      'if (true) { console.log(1); } else { console.log(2); }',
+      '{ console.log(1); }'
+    );
 
-    t.end();
+    expectTransform(
+      'if (false) { console.log(1); } else { console.log(2); }',
+      '{ console.log(2); }'
+    );
+
+    expectTransform([
+      'if (true) {',
+      '  console.log(1);',
+      '} else if (true) {',
+      '  console.log(2);',
+      '} else {',
+      '  console.log(3);',
+      '}'
+    ], [
+      '{',
+      '  console.log(1);',
+      '}'
+    ]);
+
+    expectTransform([
+      'if (false) {',
+      '  console.log(1);',
+      '} else if (true) {',
+      '  console.log(2);',
+      '} else {',
+      '  console.log(3);',
+      '}'
+    ], [
+      '{',
+      '  console.log(2);',
+      '}'
+    ]);
+
+    expectTransform([
+      'if (false)',
+      '  console.log(1);',
+      'else if (true)',
+      '  console.log(2);',
+      'else',
+      '  console.log(3);',
+    ], [
+      'console.log(2);'
+    ]);
+
+    expectTransform([
+      'if (false || false || func()) {',
+      '  console.log(1);',
+      '} else if (false ? true : (func())) {',
+      '  console.log(2);',
+      '} else {',
+      '  console.log(3);',
+      '}'
+    ], [
+      'if (func()) {',
+      '  console.log(1);',
+      '} else if (func()) {',
+      '  console.log(2);',
+      '} else {',
+      '  console.log(3);',
+      '}'
+    ]);
+
   });
 
 });
