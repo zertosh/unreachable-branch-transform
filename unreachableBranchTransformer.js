@@ -4,16 +4,16 @@ var recast = require('recast');
 var types = recast.types;
 var b = types.builders;
 
-module.exports = removeUnreachable;
+var VISITOR_METHODS = {
+  visitLogicalExpression: visitLogicalExp,
+  visitIfStatement: visitCondition,
+  visitConditionalExpression: visitCondition
+};
 
-function removeUnreachable(branch) {
-  recast.visit(branch, {
-    visitLogicalExpression: visitLogicalExp,
-    visitIfStatement: visitCondition,
-    visitConditionalExpression: visitCondition
-  });
+module.exports = function(branch) {
+  recast.visit(branch, VISITOR_METHODS);
   return branch;
-}
+};
 
 
 /**
@@ -31,28 +31,28 @@ function visitLogicalExp(path) {
   if (leftEval === true && path.node.operator === '||') {
     // console.log('true || ___');
     path.replace(b.literal(true));
-    removeUnreachable(path);
+    recast.visit(path, VISITOR_METHODS);
     return false;
   }
 
   if (leftEval === true && path.node.operator === '&&') {
     // console.log('true && ___');
     path.replace(path.node.right);
-    removeUnreachable(path);
+    recast.visit(path, VISITOR_METHODS);
     return false;
   }
 
   if (leftEval === false && path.node.operator === '&&') {
     // console.log('false && ___');
     path.replace(b.literal(false));
-    removeUnreachable(path);
+    recast.visit(path, VISITOR_METHODS);
     return false;
   }
 
   if (leftEval === false && path.node.operator === '||') {
     // console.log('false || ___');
     path.replace(path.node.right);
-    removeUnreachable(path);
+    recast.visit(path, VISITOR_METHODS);
     return false;
   }
 }
@@ -72,14 +72,14 @@ function visitCondition(path) {
   if (testEval === true) {
     // console.log('if/? (true)');
     path.replace(path.value.consequent);
-    removeUnreachable(path);
+    recast.visit(path, VISITOR_METHODS);
     return false;
   }
 
   if (testEval === false) {
     // console.log('if/? (false)');
     path.replace(path.value.alternate);
-    removeUnreachable(path);
+    recast.visit(path, VISITOR_METHODS);
     return false;
   }
 }
