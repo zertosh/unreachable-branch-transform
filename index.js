@@ -4,6 +4,7 @@ var recast = require('recast');
 var transformer = require('./unreachableBranchTransformer');
 
 module.exports = function (file, opts) {
+  opts = opts || [];
   var ignore = ['.json'].concat(opts.ignore || []).some(function(ext) {
     return file.indexOf(ext, file.length - ext.length) !== -1;
   });
