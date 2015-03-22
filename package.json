@@ -1,6 +1,6 @@
 {
   "name": "unreachable-branch-transform",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Browserify transform to remove unreachable code",
   "keywords": [
     "browserify",
