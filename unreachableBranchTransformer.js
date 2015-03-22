@@ -1,4 +1,4 @@
-var booleanCondition = require('./lib/evaluator').booleanCondition;
+var booleanCondition = require('esmangle-evaluator').booleanCondition;
 
 var recast = require('recast');
 var types = recast.types;

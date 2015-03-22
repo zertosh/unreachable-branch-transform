@@ -52,4 +52,4 @@ if ('production' === 'development') {
 
 Credit
 ------
-`lib/evaluator.js` is from the [esmangle](https://github.com/Constellation/esmangle) project.
+`esmangle-evaluator` is from the [esmangle](https://github.com/Constellation/esmangle) project.

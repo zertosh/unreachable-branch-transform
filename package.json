@@ -15,8 +15,6 @@
   "files": [
     "README.md",
     "LICENSE",
-    "lib/common.js",
-    "lib/evaluator.js",
     "index.js",
     "unreachableBranchTransformer.js"
   ],
@@ -29,6 +27,7 @@
     "test": "mocha test/*.js"
   },
   "dependencies": {
+    "esmangle-evaluator": "^1.0.0",
     "recast": "^0.10.1",
     "through2": "^0.6.2"
   },
