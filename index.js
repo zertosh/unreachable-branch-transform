@@ -3,14 +3,18 @@ var recast = require('recast');
 
 var transformer = require('./unreachableBranchTransformer');
 
-module.exports = function (file, opts) {
-  opts = opts || [];
-  var ignore = ['.json'].concat(opts.ignore || []).some(function(ext) {
-    return file.indexOf(ext, file.length - ext.length) !== -1;
-  });
+module.exports = function () {
+  var file = typeof arguments[0] == 'string' ? arguments[0] : null;
+  var opts = (typeof arguments[0] == 'string' ? arguments[1] : arguments[0]) || {};
 
-  if (ignore) {
-    return through();
+  if (file){
+    var ignore = ['.json'].concat(opts.ignore || []).some(function(ext) {
+      return file.indexOf(ext, file.length - ext.length) !== -1;
+    });
+
+    if (ignore) {
+      return through();
+    }
   }
 
   var buffers = [];
