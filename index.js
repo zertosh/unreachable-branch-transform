@@ -4,13 +4,15 @@ var recast = require('recast');
 var transformer = require('./unreachableBranchTransformer');
 
 module.exports = function (file, opts) {
-  opts = opts || [];
-  var ignore = ['.json'].concat(opts.ignore || []).some(function(ext) {
-    return file.indexOf(ext, file.length - ext.length) !== -1;
-  });
+  if (typeof file === 'string') {
+    opts = opts || [];
+    var ignore = ['.json'].concat(opts.ignore || []).some(function(ext) {
+      return file.indexOf(ext, file.length - ext.length) !== -1;
+    });
 
-  if (ignore) {
-    return through();
+    if (ignore) {
+      return through();
+    }
   }
 
   var buffers = [];
