@@ -15,45 +15,20 @@ module.exports = function(branch) {
   return branch;
 };
 
-
 /**
  *  "||" and "&&"
  */
 function visitLogicalExp(path) {
-  var leftEval = booleanCondition(path.node.left);
+  var leftEval = booleanCondition(this.visit(path.get('left')));
 
-  if (typeof leftEval !== 'boolean') {
-    // console.log('___ %s ___', path.node.operator);
-    this.traverse(path);
-    return;
-  }
-
-  if (leftEval === true && path.node.operator === '||') {
-    // console.log('true || ___');
-    path.replace(b.literal(true));
-    recast.visit(path, VISITOR_METHODS);
-    return false;
-  }
-
-  if (leftEval === true && path.node.operator === '&&') {
-    // console.log('true && ___');
-    path.replace(path.node.right);
-    recast.visit(path, VISITOR_METHODS);
-    return false;
-  }
-
-  if (leftEval === false && path.node.operator === '&&') {
-    // console.log('false && ___');
-    path.replace(b.literal(false));
-    recast.visit(path, VISITOR_METHODS);
-    return false;
-  }
-
-  if (leftEval === false && path.node.operator === '||') {
-    // console.log('false || ___');
-    path.replace(path.node.right);
-    recast.visit(path, VISITOR_METHODS);
-    return false;
+  if (typeof leftEval === 'boolean') {
+    path.replace(
+      leftEval === (path.node.operator === '&&')
+        ? this.visit(path.get('right'))
+        : b.literal(leftEval)
+    );
+  } else {
+    this.visit(path.get('right'));
   }
 }
 
@@ -61,25 +36,18 @@ function visitLogicalExp(path) {
  *  "if" and ternary "?"
  */
 function visitCondition(path) {
-  var testEval = booleanCondition(path.node.test);
+  var testEval = booleanCondition(this.visit(path.get('test')));
 
-  if (typeof testEval !== 'boolean') {
-    // console.log('if/? ___');
-    this.traverse(path);
-    return;
+  var replacement;
+  if (testEval !== false) {
+    replacement = this.visit(path.get('consequent'));
   }
 
-  if (testEval === true) {
-    // console.log('if/? (true)');
-    path.replace(path.value.consequent);
-    recast.visit(path, VISITOR_METHODS);
-    return false;
+  if (testEval !== true) {
+    replacement = this.visit(path.get('alternate'));
   }
 
-  if (testEval === false) {
-    // console.log('if/? (false)');
-    path.replace(path.value.alternate);
-    recast.visit(path, VISITOR_METHODS);
-    return false;
+  if (typeof testEval === 'boolean') {
+    path.replace(replacement);
   }
 }
