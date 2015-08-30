@@ -1,119 +1,137 @@
-var assert = require('assert');
+var test = require('tap').test;
+var transform = require('../').transform;
 
-describe('unreachable-branch-transform', function() {
-
-  var transform = require('../').transform;
-
-  function expectTransform(code_, result_) {
+function expectTransform(t) {
+  return function(code_, result_) {
     var code = Array.isArray(code_) ? code_.join('\n') : code_;
     var result = Array.isArray(result_) ? result_.join('\n') : result_;
-    return assert.equal(transform(code), result);
-  }
+    return t.equal(transform(code), result);
+  };
+}
 
-  it('works in ExpressionStatement', function() {
-    expectTransform(
+
+test('unreachable-branch-transform', function(t) {
+
+  //----------------------------------------------------------------------------
+  // ExpressionStatement
+  //----------------------------------------------------------------------------
+
+  t.test('ExpressionStatement', function(t) {
+    expectTransform(t)(
       'true || true;',
       'true;'
     );
 
-    expectTransform(
+    expectTransform(t)(
       'false || console.log();',
       'console.log();'
     );
 
-    expectTransform(
+    expectTransform(t)(
       'true && console.log();',
       'console.log();'
     );
 
-    expectTransform(
+    expectTransform(t)(
       'true || console.log();',
       'true;'
     );
 
-    expectTransform(
+    expectTransform(t)(
       'false && console.log();',
       'false;'
     );
+
+    t.end();
   });
 
 
-  it('works in VariableDeclarator', function() {
+  //----------------------------------------------------------------------------
+  // VariableDeclarator
+  //----------------------------------------------------------------------------
 
-    expectTransform(
+  t.test('VariableDeclarator', function(t) {
+
+    expectTransform(t)(
       'var a = true ? true : true;',
       'var a = true;'
     );
 
-    expectTransform(
+    expectTransform(t)(
       'var a = true ? true : true;',
       'var a = true;'
     );
 
-    expectTransform(
+    expectTransform(t)(
       'var a = false ? true : true;',
       'var a = true;'
     );
 
-    expectTransform(
+    expectTransform(t)(
       'var a = true ? console.log() : true;',
       'var a = console.log();'
     );
 
-    expectTransform(
+    expectTransform(t)(
       'var a = true ? true : console.log();',
       'var a = true;'
     );
 
-    expectTransform(
+    expectTransform(t)(
       'var a = true ? console.log() : console.log();',
       'var a = console.log();'
     );
 
-    expectTransform(
+    expectTransform(t)(
       'var a = "true" ? true : console.log();',
       'var a = true;'
     );
 
-    expectTransform(
+    expectTransform(t)(
       'var a = "true" ? console.log(1) : console.log(2);',
       'var a = console.log(1);'
     );
 
-    expectTransform(
+    expectTransform(t)(
       'var a = "" ? console.log() : true;',
       'var a = true;'
     );
 
-    expectTransform(
+    expectTransform(t)(
       'var a = "" ? console.log(1) : console.log(2);',
       'var a = console.log(2);'
     );
 
-    expectTransform(
+    expectTransform(t)(
       'var a = "production" !== "development" ? console.log(3) : console.log(4);',
       'var a = console.log(3);'
     );
 
-    expectTransform(
+    expectTransform(t)(
       'var a = "production" === "development" ? console.log(5) : console.log(6);',
       'var a = console.log(6);'
     );
+
+    t.end();
   });
 
-  it('works in IfStatement', function() {
+  //----------------------------------------------------------------------------
+  // IfStatement
+  //----------------------------------------------------------------------------
 
-    expectTransform(
+  t.test('IfStatement', function(t) {
+
+    expectTransform(t)(
       'if (true) { console.log(1); } else { console.log(2); }',
       '{ console.log(1); }'
     );
 
-    expectTransform(
+    expectTransform(t)(
       'if (false) { console.log(1); } else { console.log(2); }',
       '{ console.log(2); }'
     );
 
-    expectTransform([
+    expectTransform(t)([
       'if (true) {',
       '  console.log(1);',
       '} else if (true) {',
@@ -127,7 +145,7 @@ describe('unreachable-branch-transform', function() {
       '}'
     ]);
 
-    expectTransform([
+    expectTransform(t)([
       'if (false) {',
       '  console.log(1);',
       '} else if (true) {',
@@ -141,7 +159,7 @@ describe('unreachable-branch-transform', function() {
       '}'
     ]);
 
-    expectTransform([
+    expectTransform(t)([
       'if (false)',
       '  console.log(1);',
       'else if (true)',
@@ -152,7 +170,7 @@ describe('unreachable-branch-transform', function() {
       'console.log(2);'
     ]);
 
-    expectTransform([
+    expectTransform(t)([
       'if (false || false || func()) {',
       '  console.log(1);',
       '} else if (false ? true : (func())) {',
@@ -170,6 +188,8 @@ describe('unreachable-branch-transform', function() {
       '}'
     ]);
 
+    t.end();
   });
 
+  t.end();
 });

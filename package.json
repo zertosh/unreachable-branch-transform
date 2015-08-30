@@ -14,7 +14,6 @@
   "author": "Andres Suarez <zertosh@gmail.com>",
   "files": [
     "README.md",
-    "LICENSE",
     "index.js",
     "unreachableBranchTransformer.js"
   ],
@@ -23,15 +22,15 @@
     "type": "git",
     "url": "git://github.com/zertosh/unreachable-branch-transform.git"
   },
-  "scripts": {
-    "test": "mocha test/*.js"
-  },
   "dependencies": {
     "esmangle-evaluator": "^1.0.0",
-    "recast": "^0.10.1",
-    "through2": "^0.6.2"
+    "recast": "^0.10.1"
   },
   "devDependencies": {
-    "mocha": "^2.1.0"
+    "browserify": "^11.0.1",
+    "tap": "^1.0.2"
+  },
+  "scripts": {
+    "test": "tap test/*.js"
   }
 }

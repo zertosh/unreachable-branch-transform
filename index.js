@@ -1,33 +1,59 @@
-var through = require('through2');
 var recast = require('recast');
+var stream = require('stream');
+var util = require('util');
 
 var transformer = require('./unreachableBranchTransformer');
 
-module.exports = function (file, opts) {
-  if (typeof file === 'string') {
-    opts = opts || [];
-    var ignore = ['.json'].concat(opts.ignore || []).some(function(ext) {
-      return file.indexOf(ext, file.length - ext.length) !== -1;
-    });
+module.exports = UBT;
+util.inherits(UBT, stream.Transform);
 
-    if (ignore) {
-      return through();
-    }
+function UBT(file, opts) {
+  if (!(this instanceof UBT)) {
+    return UBT.configure(opts)(file);
   }
 
-  var buffers = [];
-  return through(function(chunk, enc, cb) {
-    buffers.push(chunk);
-    cb();
-  }, function(cb) {
-    var source = Buffer.concat(buffers).toString();
-    this.push(transform(source));
-    cb();
-  });
-};
-
-function transform(code/*, opts*/) {
-  return recast.print( transformer( recast.parse(code) ) ).code;
+  stream.Transform.call(this);
+  this._data = '';
 }
 
-module.exports.transform = transform;
+UBT.prototype._transform = function(buf, enc, cb) {
+  this._data += buf;
+  cb();
+};
+
+UBT.prototype._flush = function(cb) {
+  try {
+    var code = UBT.transform(this._data);
+    this.push(code);
+  } catch(err) {
+    this.emit('error', err);
+    return;
+  }
+  cb();
+};
+
+UBT.configure = function(opts) {
+  var ignores = ['.json'].concat(opts && opts.ignore || []);
+
+  return function(file) {
+    for (var i = 0; i < ignores.length; i++) {
+      if (endsWith(file, ignores[i])) {
+        return stream.PassThrough();
+      }
+    }
+
+    return new UBT(file);
+  }
+};
+
+UBT.transform = function(code) {
+  var ast = transformer(recast.parse(code));
+  return recast.print(ast).code;
+};
+
+function endsWith(str, suffix) {
+  if (typeof str !== 'string' || typeof suffix !== 'string') {
+    return false;
+  }
+  return str.indexOf(suffix, str.length - suffix.length) !== -1;
+}

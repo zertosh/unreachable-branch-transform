@@ -1,6 +1,8 @@
 unreachable-branch-transform
 ============================
 
+[![Build Status](https://travis-ci.org/zertosh/unreachable-branch-transform.svg?branch=master)](https://travis-ci.org/zertosh/unreachable-branch-transform)
+
 Removes unreachable code branches in `if` statements, ternaries `?`, and logical operations `||` `&&`, where the test is determinable (like comparing two constants). This is similar to what [UglifyJS](https://github.com/mishoo/UglifyJS2)'s "dead_code" compressor option does, but without the extra code transformations.
 
 When combined with something like [envify](https://github.com/hughsk/envify) and [browserify](https://github.com/substack/node-browserify), you can perform conditional `require` calls without including more code than you need.
