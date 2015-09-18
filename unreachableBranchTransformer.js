@@ -36,7 +36,8 @@ function visitLogicalExp(path) {
 
   if (leftEval === true && path.node.operator === '||') {
     // console.log('true || ___');
-    path.replace(b.literal(true));
+    path.replace(path.node.left);
+    recast.visit(path, VISITOR_METHODS);
     return false;
   }
 
@@ -49,7 +50,8 @@ function visitLogicalExp(path) {
 
   if (leftEval === false && path.node.operator === '&&') {
     // console.log('false && ___');
-    path.replace(b.literal(false));
+    path.replace(path.node.left);
+    recast.visit(path, VISITOR_METHODS);
     return false;
   }
 

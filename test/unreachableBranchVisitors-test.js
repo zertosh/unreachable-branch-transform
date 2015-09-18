@@ -51,8 +51,28 @@ test('unreachable-branch-transform', function(t) {
     );
 
     expectTransform(t)(
+      '"foo" || console.log();',
+      '"foo";'
+    );
+
+    expectTransform(t)(
+      '[1] || console.log();',
+      '[1];'
+    );
+
+    expectTransform(t)(
       'false && console.log();',
       'false;'
+    );
+
+    expectTransform(t)(
+      'null && console.log();',
+      'null;'
+    );
+
+    expectTransform(t)(
+      'void 0 && console.log();',
+      'void 0;'
     );
 
     t.end();
