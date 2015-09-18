@@ -1,4 +1,4 @@
-var booleanCondition = require('esmangle-evaluator').booleanCondition;
+var Evaluator = require('esmangle-evaluator');
 
 var recast = require('recast');
 var types = recast.types;
@@ -20,10 +20,16 @@ module.exports = function(branch) {
  *  "||" and "&&"
  */
 function visitLogicalExp(path) {
-  var leftEval = booleanCondition(path.node.left);
+  var leftEval = Evaluator.booleanCondition(path.node.left);
 
   if (typeof leftEval !== 'boolean') {
     // console.log('___ %s ___', path.node.operator);
+    this.traverse(path);
+    return;
+  }
+
+  var leftSideEffect = Evaluator.hasSideEffect(path.node.left);
+  if (leftSideEffect) {
     this.traverse(path);
     return;
   }
@@ -59,10 +65,16 @@ function visitLogicalExp(path) {
  *  "if" and ternary "?"
  */
 function visitCondition(path) {
-  var testEval = booleanCondition(path.node.test);
+  var testEval = Evaluator.booleanCondition(path.node.test);
 
   if (typeof testEval !== 'boolean') {
     // console.log('if/? ___');
+    this.traverse(path);
+    return;
+  }
+
+  var testSideEffect = Evaluator.hasSideEffect(path.node.test);
+  if (testSideEffect) {
     this.traverse(path);
     return;
   }

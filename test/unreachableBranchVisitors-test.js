@@ -13,6 +13,19 @@ function expectTransform(t) {
 test('unreachable-branch-transform', function(t) {
 
   //----------------------------------------------------------------------------
+  // With side-effects
+  //----------------------------------------------------------------------------
+  t.test('AssignmentExpression', function(t) {
+    expectTransform(t)(
+      'foo || (a = new RegExp("")) && bar();',
+      'foo || (a = new RegExp("")) && bar();'
+    );
+
+    t.end();
+  });
+
+
+  //----------------------------------------------------------------------------
   // ExpressionStatement
   //----------------------------------------------------------------------------
 
