@@ -46,11 +46,26 @@ if ('production' === 'development') {
 }
 ```
 
-#### Usage #####
+#### Usage
+
+
 
 * `unreachable-branch-transform` can be used a [browserify](https://github.com/substack/node-browserify) transform. Just include it like any other transform.
 * `unreachable-branch-transform` can also be used on raw code by calling the `transform` function exposed by requiring the package.
 
+#### Frequently asked questions ####
+
+##### Why are `undefined` equality references not removed?
+
+If you have a branch with the format
+
+```javascript
+if (undefined === 'production') {
+  /* ... */
+}
+```
+
+it will not be removed. Unfortunately, `undefined` is _not_ a constant in older browser runtimes and can be reassigned. In this case, it could be possible that `undefined` does indeed equal `'production`'.
 
 Credit
 ------
