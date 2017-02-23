@@ -75,6 +75,16 @@ test('unreachable-branch-transform', function(t) {
       'void 0;'
     );
 
+    expectTransform(t)(
+      'true || undefined === undefined || true;',
+      'true;'
+    );
+
+    expectTransform(t)(
+      '!true && undefined !== undefined && true;',
+      '!true;'
+    );
+
     t.end();
   });
 
@@ -220,6 +230,16 @@ test('unreachable-branch-transform', function(t) {
       '  console.log(3);',
       '}'
     ]);
+
+    expectTransform(t)(
+      'if (true || undefined === undefined || true) { console.log(1); } else { console.log(2); }',
+      '{ console.log(1); }'
+    );
+
+    expectTransform(t)(
+      'if (!true && undefined !== undefined) { console.log(1); } else { console.log(2); }',
+      '{ console.log(2); }'
+    );
 
     t.end();
   });

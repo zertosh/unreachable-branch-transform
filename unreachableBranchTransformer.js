@@ -37,28 +37,28 @@ function visitLogicalExp(path) {
   if (leftEval === true && path.node.operator === '||') {
     // console.log('true || ___');
     path.replace(path.node.left);
-    recast.visit(path, VISITOR_METHODS);
+    recast.visit(path.parentPath, VISITOR_METHODS);
     return false;
   }
 
   if (leftEval === true && path.node.operator === '&&') {
     // console.log('true && ___');
     path.replace(path.node.right);
-    recast.visit(path, VISITOR_METHODS);
+    recast.visit(path.parentPath, VISITOR_METHODS);
     return false;
   }
 
   if (leftEval === false && path.node.operator === '&&') {
     // console.log('false && ___');
     path.replace(path.node.left);
-    recast.visit(path, VISITOR_METHODS);
+    recast.visit(path.parentPath, VISITOR_METHODS);
     return false;
   }
 
   if (leftEval === false && path.node.operator === '||') {
     // console.log('false || ___');
     path.replace(path.node.right);
-    recast.visit(path, VISITOR_METHODS);
+    recast.visit(path.parentPath, VISITOR_METHODS);
     return false;
   }
 }
